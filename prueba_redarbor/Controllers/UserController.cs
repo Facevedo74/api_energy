@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using prueba_redarbor.Models;
 using prueba_redarbor.Service;
 
@@ -24,9 +27,11 @@ namespace prueba_redarbor.Controllers
         /// This method returns the state of the helper.
         /// </remarks>
         /// <returns>1 if exist elements</returns>
+        [Authorize]
         [HttpGet("HelperStatus")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
         public ActionResult HelperStatus()
         {
             try
@@ -47,6 +52,7 @@ namespace prueba_redarbor.Controllers
         /// This method returns the list of all employees
         /// </remarks>
         /// <returns>This method returns the list of all employees</returns>
+        [Authorize]
         [HttpGet()]
         [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -72,6 +78,7 @@ namespace prueba_redarbor.Controllers
         /// This method returns the employee item.
         /// </remarks>
         /// <returns>This method returns the employee item</returns>
+        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -96,6 +103,7 @@ namespace prueba_redarbor.Controllers
         /// This method add new employee.
         /// </remarks>
         /// <returns>This method returns the employee item</returns>
+        [Authorize]
         [HttpPost()]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -119,6 +127,7 @@ namespace prueba_redarbor.Controllers
         /// This method update the data to the employee.
         /// </remarks>
         /// <returns>This method returns void</returns>
+        [Authorize]
         [HttpPut()]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateUser([FromBody] User user)
@@ -142,6 +151,7 @@ namespace prueba_redarbor.Controllers
         /// This method delete the data to the employee.
         /// </remarks>
         /// <returns>This method returns void</returns>
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteUser(int id)
