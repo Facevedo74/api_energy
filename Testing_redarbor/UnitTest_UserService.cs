@@ -57,7 +57,7 @@ public class UnitTest_UserService
         var service = new UserService(_context);
         var actualItemId = service.HelperStatus();
 
-        Assert.AreEqual(0, actualItemId, "HelperStatus should return 0 when no item exists");
+        Assert.AreEqual(0, actualItemId, "HelperStatus: should return 0 when no item exists");
     }
 
 
@@ -72,7 +72,7 @@ public class UnitTest_UserService
 
         var service = new UserService(_context);
         var actualItemId = service.HelperStatus();
-        Assert.AreEqual(expectedItemId, actualItemId, "HelperStatus should return 1 when existing one item");
+        Assert.AreEqual(expectedItemId, actualItemId, "HelperStatus: should return 1 when existing one item");
     }
 
 
@@ -92,7 +92,7 @@ public class UnitTest_UserService
         var result = service.GetAllUser();
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(2, result.Count);
+        Assert.AreEqual(2, result.Count , "GetAllUser: Should return 2 rows in user");
     }
 
 
@@ -104,7 +104,35 @@ public class UnitTest_UserService
         var result = service.GetAllUser();
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(0, result.Count);
+        Assert.AreEqual(0, result.Count, "GetAllUser: Should return 0 rows in all users");
+    }
+
+    [TestMethod]
+    public void GetUser_Returns_User_When_UserExists()
+    {
+        var companyId = 1;
+        var testData = CreateUser("Username1", companyId);
+
+
+        _context.User.Add(testData);
+        _context.SaveChanges();
+
+        var service = new UserService(_context);
+        var result = service.GetUser(companyId);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(companyId, result.CompanyId, "GetAllUser: It should return the user id when it exists");
+    }
+
+    [TestMethod]
+    public void GetUser_Returns_EmptyUser_When_UserDoesNotExist()
+    {
+
+        var service = new UserService(_context);
+        var result = service.GetUser(1); 
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(0, result.Id, "It should return null the user when not exists");
     }
 
 
