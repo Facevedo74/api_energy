@@ -96,6 +96,7 @@ namespace prueba_redarbor.Service
                 {
                     _context.Entry(userDb).CurrentValues.SetValues(user);
                     _context.SaveChanges();
+                    return;
                 }
                 throw new Exception("User not found");
             }
@@ -115,6 +116,7 @@ namespace prueba_redarbor.Service
                 {
                     _context.User.Remove(userToDelete);
                     _context.SaveChanges();
+                    return;
                 }
 
                 throw new Exception("User not found");

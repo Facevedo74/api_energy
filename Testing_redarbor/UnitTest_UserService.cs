@@ -162,5 +162,58 @@ public class UnitTest_UserService
     }
 
 
+    [TestMethod]
+    public void UpdateUser_Updates_User_When_UserExists()
+    {
+        var companyId = 1;
+        var username = "Update_1";
+        var existingUser = CreateUser("ExistingUser", companyId);
+        _context.User.Add(existingUser);
+        _context.SaveChanges();
+
+        var newUser = new User
+        {
+            Id = existingUser.Id,
+            CompanyId = companyId,
+            CreatedOn = DateTime.Now,
+            DeletedOn = DateTime.Now,
+            Email = "string@correo.com",
+            Fax = "Numero de fax",
+            Name = "Nombre_1",
+            LastLogin = DateTime.Now,
+            Password = "Cpass_sec",
+            PortalId = 0,
+            RoleId = 1,
+            StatusId = 1,
+            Telephone = "312312",
+            UpdatedOn = DateTime.Now,
+            Username = username
+        };
+
+        var service = new UserService(_context);
+
+        service.UpdateUser(newUser);
+        var result = service.GetUser(companyId);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(companyId, result.CompanyId, "It should return the user id when it exists");
+        Assert.AreEqual(existingUser.Username, username, "It should update the user's Username");
+    }
+
+    [TestMethod]
+    public void DeleteUser_Removes_User_When_UserExists()
+    {
+        var companyId = 1;
+        var existingUser = CreateUser("ExistingUser", companyId);
+        _context.User.Add(existingUser);
+        _context.SaveChanges();
+        var service = new UserService(_context);
+
+        service.DeleteUser(existingUser.CompanyId);
+        var result = service.GetUser(existingUser.CompanyId);
+
+        Assert.AreEqual(0, result.Id, "It should return null the user when not exists");
+    }
+
 
 }
