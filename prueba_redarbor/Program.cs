@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using redarbor_PT.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,12 @@ builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Redarbor", Version = "v1" });
     var filePath = Path.Combine(AppContext.BaseDirectory, "prueba_redarbor.xml");
     c.IncludeXmlComments(filePath);
+});
+
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("mainContext"));
 });
 
 var app = builder.Build();
