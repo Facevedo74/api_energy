@@ -111,6 +111,52 @@ namespace prueba_redarbor.Controllers
                 return BadRequest();
             }
         }
+
+        /// <summary>
+        /// Update employee
+        /// </summary>
+        /// <remarks>
+        /// This method update the data to the employee.
+        /// </remarks>
+        /// <returns>This method returns void</returns>
+        [HttpPut()]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        {
+            try
+            {
+                userService.UpdateUser(user);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// Delete employere
+        /// </summary>
+        /// <remarks>
+        /// This method delete the data to the employee.
+        /// </remarks>
+        /// <returns>This method returns void</returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            try
+            {
+                userService.DeleteUser(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
     }
 }
 

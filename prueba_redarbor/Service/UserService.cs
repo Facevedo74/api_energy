@@ -87,6 +87,45 @@ namespace prueba_redarbor.Service
             }
         }
 
+        public void UpdateUser(User user)
+        {
+            try
+            {
+                var userDb = GetUser(user.CompanyId);
+                if (userDb != null)
+                {
+                    _context.Entry(userDb).CurrentValues.SetValues(user);
+                    _context.SaveChanges();
+                }
+                throw new Exception("User not found");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in UpdateUser", ex);
+            }
+
+        }
+
+        public void DeleteUser(int id)
+        {
+            try
+            {
+                var userToDelete = GetUser(id);
+                if (userToDelete != null)
+                {
+                    _context.User.Remove(userToDelete);
+                    _context.SaveChanges();
+                }
+
+                throw new Exception("User not found");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in UpdateUser", ex);
+            }
+
+        }
+
         public Boolean ValidateExistingUser(User user)
         {
             var userExist = _context.User.FirstOrDefault(x => x.CompanyId == user.CompanyId || x.Username == user.Username);
