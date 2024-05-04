@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using redarbor_PT.Models;
+using prueba_redarbor.Models;
 
-namespace redarbor_PT.Context
+namespace prueba_redarbor.Context
 {
     public class AppDbContext : DbContext
     {

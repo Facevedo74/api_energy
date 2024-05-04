@@ -21,10 +21,12 @@
     <None Remove="Controllers\" />
     <None Remove="Context\" />
     <None Remove="Models\" />
+    <None Remove="Service\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Context\" />
     <Folder Include="Models\" />
+    <Folder Include="Service\" />
   </ItemGroup>
 </Project>

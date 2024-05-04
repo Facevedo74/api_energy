@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace redarbor_PT.Models
+namespace prueba_redarbor.Models
 {
     [Table("User")]
     public class User

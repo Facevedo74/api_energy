@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using redarbor_PT.Context;
+using prueba_redarbor.Context;
+using prueba_redarbor.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("mainContext"));
 });
+
+builder.Services.AddTransient<IUserService, UserService>();
+
 
 var app = builder.Build();
 
