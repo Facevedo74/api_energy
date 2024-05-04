@@ -1,5 +1,6 @@
 ﻿using System;
 using prueba_redarbor.Context;
+using prueba_redarbor.Models;
 
 namespace prueba_redarbor.Service
 {
@@ -24,6 +25,19 @@ namespace prueba_redarbor.Service
                 throw new Exception("Error in HelperStatus", ex);
             }
         }
+
+        public List<User> GetAllUser()
+        {
+            try
+            {
+                return _context.User.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in GetAllUser", ex);
+            }
+        }
+
     }
 }
 

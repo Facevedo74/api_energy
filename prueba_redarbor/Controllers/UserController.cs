@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using prueba_redarbor.Models;
 using prueba_redarbor.Service;
 
 namespace prueba_redarbor.Controllers
@@ -31,6 +32,29 @@ namespace prueba_redarbor.Controllers
             try
             {
                 return Ok(userService.HelperStatus());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
+        /// Get All Employees.
+        /// </summary>
+        /// <remarks>
+        /// This method returns the list of all employees
+        /// </remarks>
+        /// <returns>This method returns the list of all employees</returns>
+        [HttpGet()]
+        [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAllUser()
+        {
+            try
+            {
+                return Ok(userService.GetAllUser());
             }
             catch (Exception ex)
             {
