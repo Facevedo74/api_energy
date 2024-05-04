@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.Design;
+using Microsoft.EntityFrameworkCore;
 using prueba_redarbor.Context;
 using prueba_redarbor.Models;
 using prueba_redarbor.Service;
@@ -134,6 +135,32 @@ public class UnitTest_UserService
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.Id, "It should return null the user when not exists");
     }
+
+    [TestMethod]
+    public void AddUser_Returns_NewUser_When_UserIsValid()
+    {
+        var userService = new UserService(_context);
+        var user = CreateUser("Username1", 1);
+
+        var result = userService.AddUser(user);
+
+        Assert.IsNotNull(result);
+        Assert.AreNotEqual(0, result.Id, "It should validate that an ID has been assigned to the new user"); 
+    }
+
+
+    [TestMethod]
+    public void AddUser_Throws_Exception_When_UserAlreadyExists()
+    {
+        var userService = new UserService(_context);
+        var existingUser = CreateUser("Username1", 1);
+
+        _context.User.Add(existingUser);
+        _context.SaveChanges();
+
+        Assert.ThrowsException<Exception>(() => userService.AddUser(existingUser), "It should throw an exception when trying to add an existing user");
+    }
+
 
 
 }

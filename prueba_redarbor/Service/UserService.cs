@@ -73,9 +73,9 @@ namespace prueba_redarbor.Service
                         StatusId = user.StatusId,
                         Telephone = user.Telephone,
                         UpdatedOn = user.UpdatedOn,
-                        Username = user.Username
+                        Username = user.Username,
                     };
-                    _context.User.Add(user);
+                    _context.User.Add(newUser);
                     _context.SaveChanges();
                     return newUser;
                 }
