@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1706.11
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "prueba_redarbor", "prueba_redarbor\prueba_redarbor.csproj", "{16A19F65-64A5-4806-B2CD-79E54D556215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing_redarbor", "Testing_redarbor\Testing_redarbor.csproj", "{BF8360C8-4EB3-4B32-BC18-DE173CEED40A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16A19F65-64A5-4806-B2CD-79E54D556215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16A19F65-64A5-4806-B2CD-79E54D556215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16A19F65-64A5-4806-B2CD-79E54D556215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16A19F65-64A5-4806-B2CD-79E54D556215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF8360C8-4EB3-4B32-BC18-DE173CEED40A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF8360C8-4EB3-4B32-BC18-DE173CEED40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF8360C8-4EB3-4B32-BC18-DE173CEED40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF8360C8-4EB3-4B32-BC18-DE173CEED40A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C22732F4-25A8-4A19-AB2B-539292919F78}
+	EndGlobalSection
+EndGlobal
