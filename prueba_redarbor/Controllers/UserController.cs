@@ -62,6 +62,31 @@ namespace prueba_redarbor.Controllers
                 return BadRequest();
             }
         }
+
+
+
+        /// <summary>
+        /// Get employee by Id.
+        /// </summary>
+        /// <remarks>
+        /// This method returns the employee item.
+        /// </remarks>
+        /// <returns>This method returns the employee item</returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetUser(int id)
+        {
+            try
+            {
+                return Ok(userService.GetUser(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
     }
 }
 

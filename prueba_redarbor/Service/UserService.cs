@@ -38,6 +38,21 @@ namespace prueba_redarbor.Service
             }
         }
 
+        public User GetUser(int id)
+        {
+            try
+            {
+                var user = _context.User.FirstOrDefault(x => x.CompanyId == id);
+                if (user != null) return user;
+                return new User();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in GetUser", ex);
+            }
+        }
+
+
     }
 }
 
