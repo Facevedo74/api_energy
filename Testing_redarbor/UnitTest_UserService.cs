@@ -9,32 +9,32 @@ namespace Testing_redarbor;
 public class UnitTest_UserService
 {
     private AppDbContext _context;
+    private DbContextOptions<AppDbContext> _options;
 
     [TestInitialize]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        _options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase")
             .Options;
 
-        _context = new AppDbContext(options);
+        _context = new AppDbContext(_options);
     }
 
-    [TestMethod]
-    public void HelperStatus_Returns_Zero_When_NoItemExists()
+    [TestCleanup]
+    public void Cleanup()
     {
-        var service = new UserService(_context);
-        var actualItemId = service.HelperStatus();
-
-        Assert.AreEqual(0, actualItemId, "HelperStatus should return 0 when no item exists");
+        _context.User.RemoveRange(_context.User);
+        _context.SaveChanges();
+        _context.Dispose();
     }
 
-    [TestMethod]
-    public void HelperStatus_Returns_ItemId_When_ItemExists()
+
+    private User CreateUser(string username, int companyId)
     {
-        var expectedItemId = 1;
-        var testData = new User {
-            CompanyId = 1,
+        return new User
+        {
+            CompanyId = companyId,
             CreatedOn = DateTime.Now,
             DeletedOn = DateTime.Now,
             Email = "string@correo.com",
@@ -47,23 +47,65 @@ public class UnitTest_UserService
             StatusId = 1,
             Telephone = "312312",
             UpdatedOn = DateTime.Now,
-            Username = "Username1"
+            Username = username
         };
+    }
+
+    [TestMethod]
+    public void HelperStatus_Returns_Zero_When_NoItemExists()
+    {
+        var service = new UserService(_context);
+        var actualItemId = service.HelperStatus();
+
+        Assert.AreEqual(0, actualItemId, "HelperStatus should return 0 when no item exists");
+    }
+
+
+    [TestMethod]
+    public void HelperStatus_Returns_ItemId_When_ItemExists()
+    {
+        var expectedItemId = 1;
+        var testData = CreateUser("Username1", 1);
 
         _context.User.Add(testData);
         _context.SaveChanges();
 
         var service = new UserService(_context);
         var actualItemId = service.HelperStatus();
-
         Assert.AreEqual(expectedItemId, actualItemId, "HelperStatus should return 1 when existing one item");
     }
 
 
-    [TestCleanup]
-    public void Cleanup()
+    [TestMethod]
+    public void GetAllUser_Returns_All_Users()
     {
-        _context.Dispose();
+        var users = new List<User>
+        {
+        CreateUser("Username1", 1),
+        CreateUser("Username2", 2)
+        };
+
+        _context.User.AddRange(users);
+        _context.SaveChanges();
+
+        var service = new UserService(_context);
+        var result = service.GetAllUser();
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count);
     }
+
+
+
+    [TestMethod]
+    public void GetAllUser_Returns_Zero_Users()
+    {
+        var service = new UserService(_context);
+        var result = service.GetAllUser();
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(0, result.Count);
+    }
+
 
 }
