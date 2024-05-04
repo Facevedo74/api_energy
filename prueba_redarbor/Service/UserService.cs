@@ -52,7 +52,46 @@ namespace prueba_redarbor.Service
             }
         }
 
+        public User AddUser(User user)
+        {
+            try
+            {
+                if (ValidateExistingUser(user))
+                {
+                    var newUser = new User
+                    {
+                        CompanyId = user.CompanyId,
+                        CreatedOn = user.CreatedOn,
+                        DeletedOn = user.DeletedOn,
+                        Email = user.Email,
+                        Fax = user.Fax,
+                        Name = user.Name,
+                        LastLogin = user.LastLogin,
+                        Password = user.Password,
+                        PortalId = user.PortalId,
+                        RoleId = user.RoleId,
+                        StatusId = user.StatusId,
+                        Telephone = user.Telephone,
+                        UpdatedOn = user.UpdatedOn,
+                        Username = user.Username
+                    };
+                    _context.User.Add(user);
+                    _context.SaveChanges();
+                    return newUser;
+                }
+                throw new Exception("User exist");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in AddUser", ex);
+            }
+        }
 
+        public Boolean ValidateExistingUser(User user)
+        {
+            var userExist = _context.User.FirstOrDefault(x => x.CompanyId == user.CompanyId || x.Username == user.Username);
+            return userExist == null ? true : false;
+        }
     }
 }
 

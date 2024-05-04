@@ -87,6 +87,30 @@ namespace prueba_redarbor.Controllers
                 return BadRequest();
             }
         }
+
+
+        /// <summary>
+        /// Insert new employee
+        /// </summary>
+        /// <remarks>
+        /// This method add new employee.
+        /// </remarks>
+        /// <returns>This method returns the employee item</returns>
+        [HttpPost()]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AddUser([FromBody] User user)
+        {
+            try
+            {
+                return Ok(userService.AddUser(user));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest();
+            }
+        }
     }
 }
 
