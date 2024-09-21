@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "prueba_redarbor": {
+    "api_energy": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

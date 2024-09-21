@@ -1,5 +1,5 @@
 ﻿using System;
-namespace prueba_redarbor.Models
+namespace api_energy.Models
 {
     public class LoginModel
     {

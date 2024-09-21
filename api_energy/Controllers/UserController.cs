@@ -3,12 +3,14 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using prueba_redarbor.Models;
-using prueba_redarbor.Service;
+using api_energy.Models;
+using api_energy.Service;
+using System.Text;
+using System.Security.Claims;
 
-namespace prueba_redarbor.Controllers
+namespace api_energy.Controllers
 {
-    [Route("api/redarbor")]
+    [Route("api/energy")]
     public class UserController : Controller
     {
         private IUserService userService;
@@ -27,11 +29,9 @@ namespace prueba_redarbor.Controllers
         /// This method returns the state of the helper.
         /// </remarks>
         /// <returns>1 if exist elements</returns>
-        [Authorize]
         [HttpGet("HelperStatus")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
         public ActionResult HelperStatus()
         {
             try
@@ -44,6 +44,83 @@ namespace prueba_redarbor.Controllers
                 return BadRequest();
             }
         }
+
+        /// <summary>
+        /// Get User Info.
+        /// </summary>
+        [HttpGet("user-info")]
+        public IActionResult GetUserInfo()
+        {
+            var username = "jhond";//User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+            return Ok(userService.GetUser(username));
+        }
+
+
+
+        /// <summary>
+        /// LeerArchivo.
+        /// </summary>
+        [HttpGet("leer")]
+        public IActionResult LeerArchivo()
+        {
+            try
+            {
+                var _rutaDelArchivo = "D:/Descargas/ARCHIVOS PRUEBA AUTOMATIZACION/ARCHIVOS PRUEBA AUTOMATIZACION/AT174570.std";
+                // Verifica si el archivo existe
+
+
+                try
+                {
+                    if (!System.IO.File.Exists(_rutaDelArchivo))
+                    {
+                        return NotFound("El archivo no se encontró.");
+                    }
+
+                    // Intenta leer el archivo con diferentes codificaciones
+                    string contenido;
+                    Encoding[] codificaciones = {
+                    Encoding.UTF8,
+                    Encoding.ASCII,
+                    Encoding.Unicode,
+                    Encoding.UTF32,
+                    Encoding.BigEndianUnicode,
+                    Encoding.Default,
+                    Encoding.GetEncoding("ISO-8859-1"),
+                };
+                    foreach (var codificacion in codificaciones)
+                    {
+                        try
+                        {
+                            using (StreamReader lector = new StreamReader(_rutaDelArchivo, codificacion))
+                            {
+                                contenido = lector.ReadToEnd();
+                                // Verifica si el contenido parece texto legible
+                                if (!contenido.Contains('\0')) // Verifica si el contenido no tiene caracteres nulos
+                                {
+                                    return Ok(contenido);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Ignora errores de codificación y prueba la siguiente
+                        }
+                    }
+
+                    return StatusCode(415, "No se pudo leer el archivo con las codificaciones intentadas.");
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Error al leer el archivo: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Maneja otros errores (como problemas de permisos)
+                return StatusCode(500, $"Error al leer el archivo: {ex.Message}");
+            }
+        }
+
 
         /// <summary>
         /// Get All Employees.
@@ -71,30 +148,7 @@ namespace prueba_redarbor.Controllers
 
 
 
-        /// <summary>
-        /// Get employee by Id.
-        /// </summary>
-        /// <remarks>
-        /// This method returns the employee item.
-        /// </remarks>
-        /// <returns>This method returns the employee item</returns>
-        [Authorize]
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetUser(int id)
-        {
-            try
-            {
-                return Ok(userService.GetUser(id));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return BadRequest();
-            }
-        }
-
+        
 
         /// <summary>
         /// Insert new employee

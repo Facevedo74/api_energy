@@ -1,8 +1,8 @@
 ﻿using System;
-using prueba_redarbor.Context;
-using prueba_redarbor.Models;
+using api_energy.Context;
+using api_energy.Models;
 
-namespace prueba_redarbor.Service
+namespace api_energy.Service
 {
     public class UserService : IUserService
     {
@@ -38,13 +38,11 @@ namespace prueba_redarbor.Service
             }
         }
 
-        public User GetUser(int id)
+        public User GetUser(string username)
         {
             try
             {
-                var user = _context.User.FirstOrDefault(x => x.CompanyId == id);
-                if (user != null) return user;
-                return new User();
+                return _context.User.FirstOrDefault(x => x.Username == username);
             }
             catch (Exception ex)
             {
@@ -60,20 +58,20 @@ namespace prueba_redarbor.Service
                 {
                     var newUser = new User
                     {
-                        CompanyId = user.CompanyId,
-                        CreatedOn = user.CreatedOn,
-                        DeletedOn = user.DeletedOn,
-                        Email = user.Email,
-                        Fax = user.Fax,
-                        Name = user.Name,
-                        LastLogin = user.LastLogin,
-                        Password = user.Password,
-                        PortalId = user.PortalId,
-                        RoleId = user.RoleId,
-                        StatusId = user.StatusId,
-                        Telephone = user.Telephone,
-                        UpdatedOn = user.UpdatedOn,
-                        Username = user.Username,
+                        //CompanyId = user.CompanyId,
+                        //CreatedOn = user.CreatedOn,
+                        //DeletedOn = user.DeletedOn,
+                        //Email = user.Email,
+                        //Fax = user.Fax,
+                        //Name = user.Name,
+                        //LastLogin = user.LastLogin,
+                        //Password = user.Password,
+                        //PortalId = user.PortalId,
+                        //RoleId = user.RoleId,
+                        active = user.active,
+                        //Telephone = user.Telephone,
+                        //UpdatedOn = user.UpdatedOn,
+                        //Username = user.Username,
                     };
                     _context.User.Add(newUser);
                     _context.SaveChanges();
@@ -89,21 +87,21 @@ namespace prueba_redarbor.Service
 
         public void UpdateUser(User user)
         {
-            try
-            {
-                var userDb = GetUser(user.CompanyId);
-                if (userDb != null)
-                {
-                    _context.Entry(userDb).CurrentValues.SetValues(user);
-                    _context.SaveChanges();
-                    return;
-                }
-                throw new Exception("User not found");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error in UpdateUser", ex);
-            }
+            //try
+            //{
+            //    var userDb = GetUser(user.CompanyId);
+            //    if (userDb != null)
+            //    {
+            //        _context.Entry(userDb).CurrentValues.SetValues(user);
+            //        _context.SaveChanges();
+            //        return;
+            //    }
+            //    throw new Exception("User not found");
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("Error in UpdateUser", ex);
+            //}
 
         }
 
@@ -111,7 +109,7 @@ namespace prueba_redarbor.Service
         {
             try
             {
-                var userToDelete = GetUser(id);
+                var userToDelete = GetUser(id.ToString());
                 if (userToDelete != null)
                 {
                     _context.User.Remove(userToDelete);
@@ -130,9 +128,12 @@ namespace prueba_redarbor.Service
 
         public Boolean ValidateExistingUser(User user)
         {
-            var userExist = _context.User.FirstOrDefault(x => x.CompanyId == user.CompanyId || x.Username == user.Username);
-            return userExist == null ? true : false;
+            return false;
+        //    var userExist = _context.User.FirstOrDefault(x => x.CompanyId == user.CompanyId || x.Username == user.Username);
+        //    return userExist == null ? true : false;
         }
+
+
     }
 }
 

@@ -1,16 +1,17 @@
 ﻿using System;
-using prueba_redarbor.Models;
+using api_energy.Models;
 
-namespace prueba_redarbor.Service
+namespace api_energy.Service
 {
     public interface IUserService
     {
         public int HelperStatus();
         public List<User> GetAllUser();
-        public User GetUser(int id);
+        public User GetUser(string username);
         public User AddUser(User user);
         public void UpdateUser(User user);
         public void DeleteUser(int id);
+
     }
 }
 

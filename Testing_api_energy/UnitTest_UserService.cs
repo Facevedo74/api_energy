@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.Design;
 using Microsoft.EntityFrameworkCore;
-using prueba_redarbor.Context;
-using prueba_redarbor.Models;
-using prueba_redarbor.Service;
+using api_energy.Context;
+using api_energy.Models;
+using api_energy.Service;
 
-namespace Testing_redarbor;
+namespace Testing_api_energy;
 
 [TestClass]
 public class UnitTest_UserService

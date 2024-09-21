@@ -3,10 +3,22 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using prueba_redarbor.Context;
-using prueba_redarbor.Service;
+using api_energy.Context;
+using api_energy.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
 
 builder.Services.AddControllers();
 
@@ -24,15 +36,17 @@ builder.Services.AddAuthentication(options => {
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            ValidAudience = builder.Configuration["JWT:Issuer"],
-            ValidIssuer = builder.Configuration["JWT:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
 builder.Services.AddSwaggerGen(c => {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Redarbor", Version = "v1" });
-    var filePath = Path.Combine(AppContext.BaseDirectory, "prueba_redarbor.xml");
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Energy", Version = "v1" });
+    var filePath = Path.Combine(AppContext.BaseDirectory, "api_energy.xml");
     c.IncludeXmlComments(filePath);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -66,7 +80,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IPeriodsService, PeriodsService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
 
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -77,7 +94,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
@@ -86,7 +103,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Redarbor v1");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Api Energy v1");
     options.RoutePrefix = string.Empty;
 });
 
