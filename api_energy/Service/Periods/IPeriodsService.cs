@@ -10,6 +10,9 @@ namespace api_energy.Service
         public string ExportExcel(int periodId);
 
         public (int TotalRows, List<Measurements> Results) getMeasurements(int id_period, int skip);
+
+        Task AddPeriodFilesAsync(string name, List<IFormFile> files);
+
     }
 }
 

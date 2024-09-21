@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Metrics;
+using System.Globalization;
 using System.Text;
 using api_energy.Context;
 using api_energy.Models;
@@ -54,6 +55,82 @@ namespace api_energy.Service
             {
                 throw new Exception("Error in AllPeriods", ex);
             }
+        }
+
+
+        public async Task AddPeriodFilesAsync(string name, List<IFormFile> files)
+        {
+            string uploadPath = @"C:\STD";
+
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    var filePath = Path.Combine(uploadPath, file.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                }
+            }
+
+            // Simulo que se ejecutto el bot Correctamente
+
+            //Recorro ahora los txt en la misma ruta  @"C:\STD"
+            var txtFiles = Directory.GetFiles(uploadPath, "*.txt");
+
+
+            foreach (var txtFile in txtFiles)
+            {
+                using (var reader = new StreamReader(txtFile))
+                {
+                    await reader.ReadLineAsync();
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        var parts = line.Split('\t');
+                        try
+                        {
+                            var measurement = new Measurements
+                            {
+                                Fecha = DateTime.ParseExact(parts[1], "dd/MM/yyyy", CultureInfo.InvariantCulture)
+
+                            };
+                            _context.Measurements.Add(measurement);
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                            throw ex;
+                        }
+        
+
+
+                        
+
+
+                        Console.WriteLine($"Procesando línea: {line}");
+                    }
+                }
+            }
+
+            var newPeriod = new Periods
+            {
+                name = name,
+                creator_username = "jhond",
+                date_create = DateTime.Now,
+                active = true,
+            };
+
+            //_context.Add(newPeriod);
+            //_context.SaveChanges();
+
         }
 
         public string GenerateTxT(int periodId)
