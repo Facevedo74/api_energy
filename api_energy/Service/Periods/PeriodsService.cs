@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Text;
@@ -80,6 +81,7 @@ namespace api_energy.Service
             }
 
             // Simulo que se ejecutto el bot Correctamente
+            await ExecutePythonScript();
 
             //Recorro ahora los txt en la misma ruta  @"C:\STD"
             var txtFiles = Directory.GetFiles(uploadPath, "*.txt");
@@ -131,6 +133,36 @@ namespace api_energy.Service
             //_context.Add(newPeriod);
             //_context.SaveChanges();
 
+        }
+
+        private async Task ExecutePythonScript()
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "python",
+                Arguments = @"C:\STD\script.py",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = new Process { StartInfo = startInfo })
+            {
+                process.Start();
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string error = await process.StandardError.ReadToEndAsync();
+
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception($"Error al ejecutar el script: {error}");
+                }
+
+                Console.WriteLine(output);
+            }
         }
 
         public string GenerateTxT(int periodId)
