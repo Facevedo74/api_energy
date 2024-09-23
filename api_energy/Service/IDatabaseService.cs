@@ -12,4 +12,5 @@ public interface IDatabaseService
     Task<List<Database>> GetDatabasesBySemesterId(int semesterId);
     Task AddDatabaseRange(List<Database> databases); // Nuevo método para carga masiva
 
+    Task<string> UploadExcelFile(IFormFile file, int semesterId);
 }

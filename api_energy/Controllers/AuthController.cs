@@ -23,19 +23,14 @@ namespace api_energy.Controllers
         private IConfiguration _config;
         private IAuthService authService;
         private readonly ILogger<AuthController> _logger;
-        //
-        private readonly AppDbContext _context;
-        // 
+        
 
         public AuthController(IConfiguration config, IAuthService authService, ILogger<AuthController> logger, AppDbContext context)
         {
             this.authService = authService;
             this._logger = logger;
             _config = config;
-            //
-            _context = context; // Inyección del contexto
-
-            //
+           
 
         }
 

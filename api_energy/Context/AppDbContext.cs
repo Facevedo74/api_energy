@@ -28,8 +28,10 @@ namespace api_energy.Context
             modelBuilder.Entity<User>().HasKey(x => x.user_id);
             modelBuilder.Entity<Periods>().HasKey(x => x.id);
             modelBuilder.Entity<Measurements>().HasKey(x => x.id);
+            modelBuilder.Entity<CSemester>().HasKey(x => x.id);
+            modelBuilder.Entity<Database>().HasKey(x => x.Id);
 
-       
+
 
             modelBuilder.Entity<Measurements>()
             .HasOne(m => m.Periods)

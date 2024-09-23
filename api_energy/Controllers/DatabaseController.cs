@@ -4,16 +4,19 @@ using System.Threading.Tasks;
 using api_energy.Models;
 using api_energy.Services;
 using OfficeOpenXml;
+using Microsoft.Extensions.Logging;
+using api_energy.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class DatabaseController : Controller
 {
-    private readonly IDatabaseService _service; // Cambia a la interfaz
-
-    public DatabaseController(IDatabaseService service) // Cambia a IDatabaseService
+    private readonly IDatabaseService _service; 
+    private readonly ILogger<DatabaseController> _logger;
+    public DatabaseController(IDatabaseService service, ILogger<DatabaseController> logger) 
     {
         _service = service;
+        this._logger = logger;
     }
 
     [HttpGet]
@@ -33,47 +36,18 @@ public class DatabaseController : Controller
     [HttpPost("upload-excel")]
     public async Task<ActionResult> UploadExcel(IFormFile file, [FromForm] int semesterId)
     {
-        // Validación del archivo
-        if (file == null || file.Length == 0)
+        try
         {
-            return BadRequest("No file uploaded.");
+            var message = await _service.UploadExcelFile(file, semesterId);
+            return Ok(new { message });
         }
-
-        var databases = new List<Database>();
-
-        using (var stream = new MemoryStream())
+        catch (Exception ex)
         {
-            await file.CopyToAsync(stream);
-            using (var package = new ExcelPackage(stream))
-            {
-                var worksheet = package.Workbook.Worksheets[0]; // Obtener la primera hoja
-                var rowCount = worksheet.Dimension.Rows;
-
-                // Recorrer las filas del Excel
-                for (int row = 2; row <= rowCount; row++) // Comenzar desde 2 para omitir encabezados
-                {
-                    var database = new Database
-                    {
-                        Id_Semester = semesterId,
-                        NIS = long.Parse(worksheet.Cells[row, 1].Text),
-                        NombreArchivo = worksheet.Cells[row, 2].Text,
-                        Medidor = worksheet.Cells[row, 3].Text,
-                        Provincia = worksheet.Cells[row, 4].Text,
-                        Corregimiento = worksheet.Cells[row, 5].Text,
-                        Categoria_Tarifaria = worksheet.Cells[row, 6].Text,
-                        Departamento = worksheet.Cells[row, 7].Text
-                    };
-
-                    databases.Add(database);
-                }
-            }
+            _logger.LogError(ex, "Error al subir el archivo Excel");
+            return BadRequest("Ocurrió un error al procesar el archivo.");
         }
-
-        // Llamar al servicio para agregar la lista
-        await _service.AddDatabaseRange(databases);
-        return Ok(new { message = "Carga masiva realizada con éxito." });
-
     }
+
 
 
 

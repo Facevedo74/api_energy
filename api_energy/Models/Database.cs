@@ -1,7 +1,7 @@
 ﻿using api_energy.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using System.Text.Json.Serialization;
 
 [Table("Database")]
 public class Database
@@ -40,5 +40,6 @@ public class Database
     [StringLength(100)]
     public string Departamento { get; set; }
 
-    public virtual CSemester Semester { get; set; } // Relación con la tabla Semester
+    [JsonIgnore]
+    public virtual CSemester Semester { get; set; } 
 }
