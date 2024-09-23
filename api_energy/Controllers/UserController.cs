@@ -51,7 +51,7 @@ namespace api_energy.Controllers
         [HttpGet("user-info")]
         public IActionResult GetUserInfo()
         {
-            var username = "jhond";//User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+            var username = "deicy";//User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
             return Ok(userService.GetUser(username));
         }
 

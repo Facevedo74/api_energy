@@ -5,8 +5,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using api_energy.Context;
 using api_energy.Service;
+using api_energy.Services;
+using OfficeOpenXml; 
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
 builder.Services.AddCors(options =>
@@ -34,8 +39,12 @@ builder.Services.AddAuthentication(options => {
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            //ValidateIssuer = false,
+           // ValidateAudience = false,
+
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            //
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidAudience = builder.Configuration["JWT:Audience"],
@@ -82,6 +91,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IPeriodsService, PeriodsService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddTransient<ICSemesterService, CSemesterService>();
+builder.Services.AddTransient<IDatabaseService, DatabaseService>();
+
+
+
+
 
 builder.Services.AddAuthorization();
 
@@ -95,6 +110,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+//
+app.UseAuthentication();
+//
 app.UseAuthorization();
 
 app.MapControllers();

@@ -11,7 +11,16 @@ namespace api_energy.Context
         }
 
         public DbSet<User> User { get; set; }
+
+
         public DbSet<Periods> Periods { get; set; }
+        public DbSet<CSemester> CSemesters { get; set; }
+        public DbSet<Database> Databases { get; set; }
+       
+
+
+        // public DbSet<Semester> Semesters { get; set; }
+
         public DbSet<Measurements> Measurements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,11 +29,17 @@ namespace api_energy.Context
             modelBuilder.Entity<Periods>().HasKey(x => x.id);
             modelBuilder.Entity<Measurements>().HasKey(x => x.id);
 
+       
+
             modelBuilder.Entity<Measurements>()
             .HasOne(m => m.Periods)
             .WithMany() 
             .HasForeignKey(m => m.id_period)
             .OnDelete(DeleteBehavior.Restrict);
+
+
+           
+
         }
     }
 }
