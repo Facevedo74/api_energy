@@ -20,6 +20,9 @@ namespace api_energy.Models
         [Required]
         public Boolean active { get; set; }
 
+        [NotMapped]
+        public virtual List<Files> files { get; set; }
+
     }
 }
 

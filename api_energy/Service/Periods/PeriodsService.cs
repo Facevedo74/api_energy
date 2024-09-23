@@ -33,8 +33,19 @@ namespace api_energy.Service
             {
                 throw new Exception("Error in AllPeriods", ex);
             }
+        }        
+        
+        public Periods GetPeriodById(int periodId)
+        {
+            try
+            {
+                return _context.Periods.Include(x => x.files).FirstOrDefault(x => x.id == periodId); ;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in AllPeriods", ex);
+            }
         }
-
 
         public (int TotalRows, List<Measurements> Results) getMeasurements(int id_period, int skip)
         {
@@ -42,10 +53,10 @@ namespace api_energy.Service
             {
 
                 int totalRows = _context.Measurements
-                        .Count(x => x.id_period == id_period);
+                        .Count(x => x.id_file == id_period);
 
                 var results = _context.Measurements
-                               .Where(x => x.id_period == id_period)
+                               .Where(x => x.id_file == id_period)
                                .Skip(skip)  
                                .Take(10)
                 .ToList();
@@ -59,88 +70,223 @@ namespace api_energy.Service
         }
 
 
+        public void GenerateReport(string base64String)
+        {
+            try
+            {
+                byte[] excelBytes = Convert.FromBase64String(base64String);
+
+                using (MemoryStream stream = new MemoryStream(excelBytes))
+                {
+                    using (XLWorkbook workbook = new XLWorkbook(stream))
+                    {
+                        var specificWorksheet = workbook.Worksheets.Worksheet("datos");
+                        var x = specificWorksheet;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al convertir Base64 a XLSX: {ex.Message}");
+            }
+        }
+
         public async Task AddPeriodFilesAsync(string name, List<IFormFile> files)
         {
-            string uploadPath = @"C:\STD";
-
-            if (!Directory.Exists(uploadPath))
+            try
             {
-                Directory.CreateDirectory(uploadPath);
-            }
+                string uploadPath = @"C:\STD";
 
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                await UploadFilesAsync(files, uploadPath);
+
+                var stdFiles = string.Join(",", files.Select(file => file.FileName));
+
+                await ExecutePythonScript(stdFiles);
+
+                var txtFiles = Directory.GetFiles(uploadPath, "*.txt");
+                var stdFilesRoutin = Directory.GetFiles(uploadPath, "*.std");
+
+                var newPeriod = new Periods
+                {
+                    name = name,
+                    creator_username = "jhond",
+                    date_create = DateTime.Now,
+                    active = true,
+                };
+
+
+                _context.Add(newPeriod);
+                _context.SaveChanges();
+
+
+                var listNewFiles = new List<Files>();
+                foreach (var file in files)
+                {
+                    var newFile = new Files
+                    {
+                        id_period = newPeriod.id,
+                        name_file = file.FileName,
+                    };
+                    listNewFiles.Add(newFile);
+                }
+
+                _context.AddRange(listNewFiles);
+                _context.SaveChanges();
+
+
+                var listMeasurement = await ProcessTextFilesAsync(txtFiles, listNewFiles);
+                _context.AddRange(listMeasurement);
+                _context.SaveChanges();
+
+                foreach (var txtFile in txtFiles)
+                {
+                    try
+                    {
+                        if (File.Exists(txtFile))
+                        {
+                            File.Delete(txtFile);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error eliminando el archivo {txtFile}: {ex.Message}");
+                    }
+                }
+
+                foreach (var stdFile in stdFilesRoutin)
+                {
+                    try
+                    {
+                        if (File.Exists(stdFile))
+                        {
+                            File.Delete(stdFile);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error eliminando el archivo {stdFile}: {ex.Message}");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+
+        private async Task UploadFilesAsync(List<IFormFile> files, string uploadPath)
+        {
             foreach (var file in files)
             {
                 if (file.Length > 0)
                 {
-                    var filePath = Path.Combine(uploadPath, file.FileName);
+                    var fileName = Path.GetFileName(file.FileName);
+                    var filePath = Path.Combine(uploadPath, fileName);
+
+                    Console.WriteLine($"Subiendo archivo: {fileName} - Tamaño: {file.Length} bytes");
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
                     }
+
+                    var copiedFileSize = new FileInfo(filePath).Length;
+                    Console.WriteLine($"Archivo copiado: {fileName} - Tamaño después de copiar: {copiedFileSize} bytes");
+                }
+                else
+                {
+                    Console.WriteLine($"El archivo {file.FileName} tiene longitud cero.");
                 }
             }
+        }
 
-            // Simulo que se ejecutto el bot Correctamente
-            await ExecutePythonScript();
-
-            //Recorro ahora los txt en la misma ruta  @"C:\STD"
-            var txtFiles = Directory.GetFiles(uploadPath, "*.txt");
-
+        private async Task<List<Measurements>> ProcessTextFilesAsync(string[] txtFiles, List<Files> files)
+        {
+            var listMeasurement = new List<Measurements>();
 
             foreach (var txtFile in txtFiles)
             {
-                using (var reader = new StreamReader(txtFile))
+                if (txtFile != "C:\\STD\\JNY.TXT")
                 {
-                    await reader.ReadLineAsync();
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
+                    using (var reader = new StreamReader(txtFile))
                     {
-                        var parts = line.Split('\t');
-                        try
+                        await reader.ReadLineAsync(); 
+                        string line;
+                        while ((line = await reader.ReadLineAsync()) != null)
                         {
-                            var measurement = new Measurements
+                            var parts = line.Split(',');
+                            try
                             {
-                                Fecha = DateTime.ParseExact(parts[1], "dd/MM/yyyy", CultureInfo.InvariantCulture)
+                                var measurement = new Measurements();
+                                var properties = typeof(Measurements).GetProperties();
 
-                            };
-                            _context.Measurements.Add(measurement);
+                                var realName = txtFile.Split("\\");
+                                var nameStd = realName[2].Split(".");
+                                measurement.id_file = files.FirstOrDefault(x => x.name_file == nameStd[0] + ".std")?.id ?? 0;
 
+                                for (int i = 2; i < properties.Length && i - 2 < parts.Length; i++)
+                                {
+                                    var value = parts[i - 2];
+
+                                    switch (Type.GetTypeCode(properties[i].PropertyType))
+                                    {
+                                        case TypeCode.DateTime:
+                                            if (DateTime.TryParseExact(value, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateValue))
+                                            {
+                                                properties[i].SetValue(measurement, dateValue);
+                                            }
+                                            break;
+
+                                        case TypeCode.Decimal:
+                                            if (decimal.TryParse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var decimalValue))
+                                            {
+                                                properties[i].SetValue(measurement, decimalValue);
+                                            }
+                                            break;
+
+                                        case TypeCode.String:
+                                            properties[i].SetValue(measurement, value);
+                                            break;
+
+                                        case TypeCode.Int32:
+                                            if (int.TryParse(value.Replace(".", ""), out var intValue))
+                                            {
+                                                properties[i].SetValue(measurement, intValue);
+                                            }
+                                            break;
+
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                                listMeasurement.Add(measurement);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error procesando línea: {line}. Detalles: {ex.Message}");
+                            }
                         }
-                        catch (Exception ex)
-                        {
-
-                            throw ex;
-                        }
-        
-
-
-                        
-
-
-                        Console.WriteLine($"Procesando línea: {line}");
                     }
                 }
             }
 
-            var newPeriod = new Periods
-            {
-                name = name,
-                creator_username = "jhond",
-                date_create = DateTime.Now,
-                active = true,
-            };
-
-            //_context.Add(newPeriod);
-            //_context.SaveChanges();
-
+            return listMeasurement;
         }
 
-        private async Task ExecutePythonScript()
+        private async Task ExecutePythonScript(string stdFiles)
         {
             var startInfo = new ProcessStartInfo
             {
                 FileName = "python",
-                Arguments = @"C:\STD\script.py",
+                Arguments = $@"C:\STD\scriptv2.py ""{stdFiles}""",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -168,7 +314,7 @@ namespace api_energy.Service
         public string GenerateTxT(int periodId)
         {
             var measurements = _context.Measurements
-                .Where(m => m.id_period == periodId)
+                .Where(m => m.id_file == periodId)
                 .ToList();
 
             if (measurements == null || !measurements.Any())
@@ -210,10 +356,8 @@ namespace api_energy.Service
                 "Flicker (Plt)/L1 ~", "Flicker (Plt)/L2 ~", "Flicker (Plt)/L3 ~"
             };
 
-            // Crear una cadena para las filas de datos
             var sb = new StringBuilder();
 
-            // Añadir los encabezados
             sb.AppendLine(string.Join("\t", headers));
 
             // Añadir cada fila de datos
@@ -259,7 +403,7 @@ namespace api_energy.Service
         public string ExportExcel(int periodId)
         {
             var measurements = _context.Measurements
-               .Where(m => m.id_period == periodId)
+               .Where(m => m.id_file == periodId)
                .ToList();
 
             if (measurements == null)
@@ -319,8 +463,8 @@ namespace api_energy.Service
                 int row = i + 2;
 
                 worksheet.Cell(row, 1).Value = measurement.id;
-                worksheet.Cell(row, 2).Value = measurement.Fecha.ToString("dd/MM/yyyy");
-                worksheet.Cell(row, 3).Value = measurement.Tiempo.ToString(@"hh\:mm\:ss");
+                worksheet.Cell(row, 2).Value = measurement.Fecha;
+                worksheet.Cell(row, 3).Value = measurement.Tiempo;
                 worksheet.Cell(row, 4).Value = measurement.Tension_L1_L2;
                 worksheet.Cell(row, 4).Style.NumberFormat.Format = "0.0";
 

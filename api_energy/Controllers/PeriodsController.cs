@@ -25,8 +25,17 @@ namespace api_energy.Controllers
         {
             return Ok(periodsService.AllPeriods());
         }
-        
-        
+
+
+        /// <summary>
+        /// Get All Periods.
+        /// </summary>
+        [HttpGet("GetPeriodsById")]
+        public IActionResult GetPeriodById(int periodId)
+        {
+            return Ok(periodsService.GetPeriodById(periodId));
+        }
+
         /// <summary>
         /// Get All Periods.
         /// </summary>
@@ -35,8 +44,8 @@ namespace api_energy.Controllers
         {
             return Ok(periodsService.GenerateTxT(periodId));
         }
-        
-        
+
+
         /// <summary>
         /// Get All Periods.
         /// </summary>
@@ -45,8 +54,17 @@ namespace api_energy.Controllers
         {
             return Ok(periodsService.ExportExcel(periodId));
         }
+        /// <summary>
+        /// Get All Periods.
+        /// </summary>
+        [HttpPut("generate-report")]
+        public IActionResult GenerateReport([FromBody] string base64)
+        {
+            periodsService.GenerateReport(base64);
+            return Ok("ok");
+        }
         
-        
+
         /// <summary>
         /// Get All Periods.
         /// </summary>
