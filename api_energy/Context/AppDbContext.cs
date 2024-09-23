@@ -11,7 +11,16 @@ namespace api_energy.Context
         }
 
         public DbSet<User> User { get; set; }
+
+
         public DbSet<Periods> Periods { get; set; }
+        public DbSet<CSemester> CSemesters { get; set; }
+        public DbSet<Database> Databases { get; set; }
+       
+
+
+        // public DbSet<Semester> Semesters { get; set; }
+
         public DbSet<Measurements> Measurements { get; set; }
         public DbSet<Files> Files { get; set; }
 
@@ -21,6 +30,10 @@ namespace api_energy.Context
             modelBuilder.Entity<Periods>().HasKey(x => x.id);
             modelBuilder.Entity<Measurements>().HasKey(x => x.id);
             modelBuilder.Entity<Files>().HasKey(x => x.id);
+            modelBuilder.Entity<CSemester>().HasKey(x => x.id);
+            modelBuilder.Entity<Database>().HasKey(x => x.Id);
+
+
 
             modelBuilder.Entity<Files>()
             .HasOne(m => m.Periods)
@@ -28,8 +41,8 @@ namespace api_energy.Context
             .HasForeignKey(m => m.id_period)
             .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Periods>().HasMany(x => x.files).WithOne(m => m.Periods);
 
+            modelBuilder.Entity<Periods>().HasMany(x => x.files).WithOne(m => m.Periods);
 
         }
     }
