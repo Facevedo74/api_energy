@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using api_energy.Models;
-using api_energy.Services;
+using api_energy.Service.DataBase;
 using OfficeOpenXml;
 using Microsoft.Extensions.Logging;
 using api_energy.Controllers;
+using api_energy.Models.DTOs;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -30,6 +31,7 @@ public class DatabaseController : Controller
     public async Task<ActionResult<List<Database>>> GetBySemesterId(int semesterId)
     {
         var databases = await _service.GetDatabasesBySemesterId(semesterId);
+        
         return Ok(databases);
     }
 
@@ -70,21 +72,73 @@ public class DatabaseController : Controller
         return CreatedAtAction(nameof(GetById), new { id = database.Id }, database);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, Database database)
+
+    // Método para desactivar un registro de la base de datos por su ID
+    [HttpPut("deactivate/{id}")]
+    public async Task<ActionResult> DeactivateDatabase(int id)
     {
-        if (id != database.Id)
+        var result = await _service.DeactivateDatabase(id); // Cambia el estado a inactivo
+        if (!result)
         {
-            return BadRequest();
+            return NotFound(); // Si no se encuentra el registro
         }
-        await _service.UpdateDatabase(database);
-        return NoContent();
+
+        // Retorna un mensaje de éxito
+        return Ok(new { message = "El registro ha sido desactivado exitosamente." });
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    /*
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateDatabase( [FromBody] Database updatedData)
     {
-        await _service.DeleteDatabase(id);
-        return NoContent();
+
+        try
+        {
+            var updatedDatabase = await _service.UpdateDatabaseAsync(updatedData);
+            return Ok(updatedDatabase); // Devuelve el objeto actualizado
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Internal server error");
+        }
     }
+    */
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateDatabase([FromBody] UpdateDatabaseDto updateDto)
+    {
+        try
+        {
+            // Valida que el ID del DTO esté presente
+            if (updateDto.Id <= 0)
+            {
+                return BadRequest("El ID es requerido.");
+            }
+
+            var updatedDatabase = await _service.UpdateDatabaseAsync(updateDto);
+            return Ok(updatedDatabase); // Devuelve el objeto actualizado
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+
 }

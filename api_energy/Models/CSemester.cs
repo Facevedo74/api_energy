@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace api_energy.Models
 {
@@ -26,5 +27,11 @@ namespace api_energy.Models
 
         [Required]
         public byte type { get; set; } // Cambiado a byte para tinyint
+
+        // Relación uno a muchos con Database
+        public ICollection<Database> Databases { get; set; }
+
+        // [JsonIgnore]
+        // public virtual Database database { get; set; }
     }
 }
