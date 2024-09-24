@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
+
 [Table("Database")]
 public class Database
 {
@@ -40,6 +41,10 @@ public class Database
     [StringLength(100)]
     public string Departamento { get; set; }
 
+    [Required]
+    public bool Active { get; set; } = true;
+
+    //[NotMapped]
     [JsonIgnore]
     public virtual CSemester Semester { get; set; } 
 }

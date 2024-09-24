@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using api_energy.Context;
 using api_energy.Service;
-using api_energy.Services;
-using OfficeOpenXml; 
+using OfficeOpenXml;
+using api_energy.Service.Semesters;
+using api_energy.Service.DataBase;
 
 var builder = WebApplication.CreateBuilder(args);
 

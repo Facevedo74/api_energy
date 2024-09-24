@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using api_energy.Models;
 using api_energy.Context;
 using OfficeOpenXml;
+using api_energy.Models.DTOs;
 
-namespace api_energy.Services
+namespace api_energy.Service.DataBase
 {
     public class DatabaseService : IDatabaseService
     {
@@ -21,14 +22,100 @@ namespace api_energy.Services
         {
             return await _context.Databases.Include(d => d.Semester).ToListAsync();
         }
+        
+
 
         public async Task<List<Database>> GetDatabasesBySemesterId(int semesterId)
         {
             return await _context.Databases
-                .Where(d => d.Id_Semester == semesterId)
-                .Include(d => d.Semester) // Si necesitas incluir información de la tabla Semester
+                .Where(d => d.Id_Semester == semesterId && d.Active) // Filtra por semestre y estado activo
+                .Include(d => d.Semester)
                 .ToListAsync();
         }
+
+        public async Task<Database> UpdateDatabaseAsync(UpdateDatabaseDto updateDto)
+        {
+            try
+            {
+                var databaseToUpdate = await _context.Databases.FindAsync(updateDto.Id);
+                if (databaseToUpdate == null)
+                {
+                    throw new KeyNotFoundException("Database entry not found");
+                }
+
+                // Actualiza solo los campos necesarios
+                databaseToUpdate.NIS = updateDto.NIS;
+                databaseToUpdate.NombreArchivo = updateDto.NombreArchivo;
+                databaseToUpdate.Medidor = updateDto.Medidor;
+                databaseToUpdate.Provincia = updateDto.Provincia;
+                databaseToUpdate.Corregimiento = updateDto.Corregimiento;
+                databaseToUpdate.Categoria_Tarifaria = updateDto.Categoria_Tarifaria;
+                databaseToUpdate.Departamento = updateDto.Departamento;
+
+                await _context.SaveChangesAsync();
+
+                return databaseToUpdate;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /*
+                public async Task<Database> UpdateDatabaseAsync(Database updatedData)
+                {
+                    try
+                    {
+
+                        var databaseToUpdate = await _context.Databases.FindAsync(updatedData.Id);
+                        if (databaseToUpdate == null)
+                        {
+                            throw new KeyNotFoundException("Database entry not found");
+                        }
+
+                        // Actualiza solo los campos necesarios
+                        databaseToUpdate.NIS = updatedData.NIS;
+                        databaseToUpdate.NombreArchivo = updatedData.NombreArchivo;
+                        databaseToUpdate.Medidor = updatedData.Medidor;
+                        databaseToUpdate.Provincia = updatedData.Provincia;
+                        databaseToUpdate.Corregimiento = updatedData.Corregimiento;
+                        databaseToUpdate.Categoria_Tarifaria = updatedData.Categoria_Tarifaria;
+                        databaseToUpdate.Departamento = updatedData.Departamento;
+                        // databaseToUpdate.Id_Semester = updatedData.Id_Semester; // Actualiza solo el ID del semestre
+
+                        await _context.SaveChangesAsync();
+
+                        return databaseToUpdate;
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        throw ex;
+                    }
+
+
+                }
+
+        */
+
+        public async Task<bool> DeactivateDatabase(int id)
+        {
+            var database = await _context.Databases.FindAsync(id);
+            if (database == null)
+            {
+                return false; // Registro no encontrado
+            }
+
+            // Cambia el estado de 'Active' a false
+            database.Active = false;
+            await _context.SaveChangesAsync();
+
+            return true; // Operación exitosa
+        }
+
+
 
         public async Task AddDatabaseRange(List<Database> databases)
         {
@@ -91,11 +178,7 @@ namespace api_energy.Services
             return "Carga masiva realizada con éxito.";
         }
 
-        public async Task UpdateDatabase(Database database)
-        {
-            _context.Databases.Update(database);
-            await _context.SaveChangesAsync();
-        }
+
 
         public async Task DeleteDatabase(int id)
         {

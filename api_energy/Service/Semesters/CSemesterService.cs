@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using api_energy.Models;
 using api_energy.Context;
 
-namespace api_energy.Service
+namespace api_energy.Service.Semesters
 {
     public class CSemesterService : ICSemesterService
     {
