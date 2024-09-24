@@ -6,6 +6,7 @@ using api_energy.Models;
 using api_energy.Context;
 using OfficeOpenXml;
 using api_energy.Models.DTOs;
+using Newtonsoft.Json;
 
 namespace api_energy.Service.DataBase
 {
@@ -28,12 +29,12 @@ namespace api_energy.Service.DataBase
         public async Task<List<Database>> GetDatabasesBySemesterId(int semesterId)
         {
             return await _context.Databases
-                .Where(d => d.Id_Semester == semesterId && d.Active) // Filtra por semestre y estado activo
+                .Where(d => d.Id_Semester == semesterId && d.Active) 
                 .Include(d => d.Semester)
                 .ToListAsync();
         }
 
-        public async Task<Database> UpdateDatabaseAsync(UpdateDatabaseDto updateDto)
+        public async Task<UpdateDatabaseDto> UpdateDatabaseAsync(UpdateDatabaseDto updateDto)
         {
             try
             {
@@ -43,7 +44,7 @@ namespace api_energy.Service.DataBase
                     throw new KeyNotFoundException("Database entry not found");
                 }
 
-                // Actualiza solo los campos necesarios
+                
                 databaseToUpdate.NIS = updateDto.NIS;
                 databaseToUpdate.NombreArchivo = updateDto.NombreArchivo;
                 databaseToUpdate.Medidor = updateDto.Medidor;
@@ -54,7 +55,11 @@ namespace api_energy.Service.DataBase
 
                 await _context.SaveChangesAsync();
 
-                return databaseToUpdate;
+                string databaseJson = JsonConvert.SerializeObject(databaseToUpdate);
+
+                UpdateDatabaseDto updatedDto = JsonConvert.DeserializeObject<UpdateDatabaseDto>(databaseJson);
+
+                return updatedDto;
             }
             catch (Exception ex)
             {
@@ -62,57 +67,18 @@ namespace api_energy.Service.DataBase
             }
         }
 
-        /*
-                public async Task<Database> UpdateDatabaseAsync(Database updatedData)
-                {
-                    try
-                    {
-
-                        var databaseToUpdate = await _context.Databases.FindAsync(updatedData.Id);
-                        if (databaseToUpdate == null)
-                        {
-                            throw new KeyNotFoundException("Database entry not found");
-                        }
-
-                        // Actualiza solo los campos necesarios
-                        databaseToUpdate.NIS = updatedData.NIS;
-                        databaseToUpdate.NombreArchivo = updatedData.NombreArchivo;
-                        databaseToUpdate.Medidor = updatedData.Medidor;
-                        databaseToUpdate.Provincia = updatedData.Provincia;
-                        databaseToUpdate.Corregimiento = updatedData.Corregimiento;
-                        databaseToUpdate.Categoria_Tarifaria = updatedData.Categoria_Tarifaria;
-                        databaseToUpdate.Departamento = updatedData.Departamento;
-                        // databaseToUpdate.Id_Semester = updatedData.Id_Semester; // Actualiza solo el ID del semestre
-
-                        await _context.SaveChangesAsync();
-
-                        return databaseToUpdate;
-
-                    }
-                    catch (Exception ex)
-                    {
-
-                        throw ex;
-                    }
-
-
-                }
-
-        */
-
         public async Task<bool> DeactivateDatabase(int id)
         {
             var database = await _context.Databases.FindAsync(id);
             if (database == null)
             {
-                return false; // Registro no encontrado
+                return false; 
             }
 
-            // Cambia el estado de 'Active' a false
             database.Active = false;
             await _context.SaveChangesAsync();
 
-            return true; // Operación exitosa
+            return true; 
         }
 
 
@@ -150,11 +116,11 @@ namespace api_energy.Service.DataBase
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
-                    var worksheet = package.Workbook.Worksheets[0]; // Obtener la primera hoja
+                    var worksheet = package.Workbook.Worksheets[0]; 
                     var rowCount = worksheet.Dimension.Rows;
 
-                    // Recorrer las filas del Excel
-                    for (int row = 2; row <= rowCount; row++) // Comenzar desde 2 para omitir encabezados
+                 
+                    for (int row = 2; row <= rowCount; row++) 
                     {
                         var database = new Database
                         {
@@ -173,7 +139,6 @@ namespace api_energy.Service.DataBase
                 }
             }
 
-            // Llamar al método para agregar la lista
             await AddDatabaseRange(databases);
             return "Carga masiva realizada con éxito.";
         }

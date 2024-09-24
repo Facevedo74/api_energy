@@ -44,7 +44,6 @@ public class Database
     [Required]
     public bool Active { get; set; } = true;
 
-    //[NotMapped]
     [JsonIgnore]
     public virtual CSemester Semester { get; set; } 
 }
