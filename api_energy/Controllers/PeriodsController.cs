@@ -99,9 +99,27 @@ namespace api_energy.Controllers
             return Ok(new { Message = "Files uploaded successfully." });
         }
 
+
+        /// <summary>
+        /// Add files in periods.
+        /// </summary>
+        [HttpPost("editFilesPeriod")]
+        public async Task<IActionResult> AditFilesPeriod([FromForm] PeriodRequest request)
+        {
+            if (request.Files == null || request.Files.Count == 0)
+            {
+                return BadRequest("No files received.");
+            }
+
+            await periodsService.AditFilesPeriod(request.id, request.Files);
+
+            return Ok(new { Message = "Files uploaded successfully." });
+        }
+
         public class PeriodRequest
         {
             public string Name { get; set; }
+            public int id { get; set; }
             public List<IFormFile> Files { get; set; }
         }
     }

@@ -39,7 +39,7 @@ namespace api_energy.Service
         {
             try
             {
-                return _context.Periods.Include(x => x.files).FirstOrDefault(x => x.id == periodId); ;
+                return _context.Periods.Include(x => x.files).FirstOrDefault(x => x.id == periodId);
             }
             catch (Exception ex)
             {
@@ -68,7 +68,6 @@ namespace api_energy.Service
                 throw new Exception("Error in AllPeriods", ex);
             }
         }
-
 
         public void GenerateReport(string base64String)
         {
@@ -143,35 +142,9 @@ namespace api_energy.Service
                 _context.AddRange(listMeasurement);
                 _context.SaveChanges();
 
-                foreach (var txtFile in txtFiles)
-                {
-                    try
-                    {
-                        if (File.Exists(txtFile))
-                        {
-                            File.Delete(txtFile);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error eliminando el archivo {txtFile}: {ex.Message}");
-                    }
-                }
 
-                foreach (var stdFile in stdFilesRoutin)
-                {
-                    try
-                    {
-                        if (File.Exists(stdFile))
-                        {
-                            File.Delete(stdFile);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error eliminando el archivo {stdFile}: {ex.Message}");
-                    }
-                }
+                await deleteFiles(txtFiles);
+                await deleteFiles(stdFilesRoutin);
 
             }
             catch (Exception ex)
@@ -179,6 +152,73 @@ namespace api_energy.Service
                 throw ex;
             }
             
+        }
+
+        public async Task AditFilesPeriod(int id, List<IFormFile> files)
+        {
+            try
+            {
+                string uploadPath = @"C:\STD";
+
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                await UploadFilesAsync(files, uploadPath);
+
+                var stdFiles = string.Join(",", files.Select(file => file.FileName));
+
+                await ExecutePythonScript(stdFiles);
+
+                var txtFiles = Directory.GetFiles(uploadPath, "*.txt");
+                var stdFilesRoutin = Directory.GetFiles(uploadPath, "*.std");
+
+                var listNewFiles = new List<Files>();
+                foreach (var file in files)
+                {
+                    var newFile = new Files
+                    {
+                        id_period = id,
+                        name_file = file.FileName,
+                    };
+                    listNewFiles.Add(newFile);
+                }
+
+                _context.AddRange(listNewFiles);
+                _context.SaveChanges();
+
+
+                var listMeasurement = await ProcessTextFilesAsync(txtFiles, listNewFiles);
+                _context.AddRange(listMeasurement);
+                _context.SaveChanges();
+
+                await deleteFiles(txtFiles);
+                await deleteFiles(stdFilesRoutin);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task deleteFiles(string[] files) 
+        {
+            foreach (var stdFile in files)
+            {
+                try
+                {
+                    if (File.Exists(stdFile))
+                    {
+                        File.Delete(stdFile);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error eliminando el archivo {stdFile}: {ex.Message}");
+                }
+            }
         }
 
         private async Task UploadFilesAsync(List<IFormFile> files, string uploadPath)
