@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using api_energy.Models;
-using api_energy.Service;
+using api_energy.Service.Semesters;
 
 namespace api_energy.Controllers
 {

@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using api_energy.Context;
 using api_energy.Service;
-using api_energy.Services;
-using OfficeOpenXml; 
+using OfficeOpenXml;
+using api_energy.Service.Semesters;
+using api_energy.Service.DataBase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,9 @@ builder.Services.AddAuthentication(options => {
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            //ValidateIssuer = false,
-           // ValidateAudience = false,
-
+        
             ValidateIssuer = true,
             ValidateAudience = true,
-            //
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidAudience = builder.Configuration["JWT:Audience"],
@@ -111,9 +109,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-//
+
 app.UseAuthentication();
-//
+
 app.UseAuthorization();
 
 app.MapControllers();

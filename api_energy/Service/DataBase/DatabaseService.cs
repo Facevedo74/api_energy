@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using api_energy.Models;
 using api_energy.Context;
 using OfficeOpenXml;
+using api_energy.Models.DTOs;
+using Newtonsoft.Json;
 
-namespace api_energy.Services
+namespace api_energy.Service.DataBase
 {
     public class DatabaseService : IDatabaseService
     {
@@ -21,14 +23,65 @@ namespace api_energy.Services
         {
             return await _context.Databases.Include(d => d.Semester).ToListAsync();
         }
+        
+
 
         public async Task<List<Database>> GetDatabasesBySemesterId(int semesterId)
         {
             return await _context.Databases
-                .Where(d => d.Id_Semester == semesterId)
-                .Include(d => d.Semester) // Si necesitas incluir información de la tabla Semester
+                .Where(d => d.Id_Semester == semesterId && d.Active) 
+                .Include(d => d.Semester)
                 .ToListAsync();
         }
+
+        public async Task<UpdateDatabaseDto> UpdateDatabaseAsync(UpdateDatabaseDto updateDto)
+        {
+            try
+            {
+                var databaseToUpdate = await _context.Databases.FindAsync(updateDto.Id);
+                if (databaseToUpdate == null)
+                {
+                    throw new KeyNotFoundException("Database entry not found");
+                }
+
+                
+                databaseToUpdate.NIS = updateDto.NIS;
+                databaseToUpdate.NombreArchivo = updateDto.NombreArchivo;
+                databaseToUpdate.Medidor = updateDto.Medidor;
+                databaseToUpdate.Provincia = updateDto.Provincia;
+                databaseToUpdate.Corregimiento = updateDto.Corregimiento;
+                databaseToUpdate.Categoria_Tarifaria = updateDto.Categoria_Tarifaria;
+                databaseToUpdate.Departamento = updateDto.Departamento;
+
+                await _context.SaveChangesAsync();
+
+                string databaseJson = JsonConvert.SerializeObject(databaseToUpdate);
+
+                UpdateDatabaseDto updatedDto = JsonConvert.DeserializeObject<UpdateDatabaseDto>(databaseJson);
+
+                return updatedDto;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> DeactivateDatabase(int id)
+        {
+            var database = await _context.Databases.FindAsync(id);
+            if (database == null)
+            {
+                return false; 
+            }
+
+            database.Active = false;
+            await _context.SaveChangesAsync();
+
+            return true; 
+        }
+
+
 
         public async Task AddDatabaseRange(List<Database> databases)
         {
@@ -63,11 +116,11 @@ namespace api_energy.Services
                 await file.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream))
                 {
-                    var worksheet = package.Workbook.Worksheets[0]; // Obtener la primera hoja
+                    var worksheet = package.Workbook.Worksheets[0]; 
                     var rowCount = worksheet.Dimension.Rows;
 
-                    // Recorrer las filas del Excel
-                    for (int row = 2; row <= rowCount; row++) // Comenzar desde 2 para omitir encabezados
+                 
+                    for (int row = 2; row <= rowCount; row++) 
                     {
                         var database = new Database
                         {
@@ -86,16 +139,11 @@ namespace api_energy.Services
                 }
             }
 
-            // Llamar al método para agregar la lista
             await AddDatabaseRange(databases);
             return "Carga masiva realizada con éxito.";
         }
 
-        public async Task UpdateDatabase(Database database)
-        {
-            _context.Databases.Update(database);
-            await _context.SaveChangesAsync();
-        }
+
 
         public async Task DeleteDatabase(int id)
         {

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using api_energy.Models;
 
-namespace api_energy.Service
+namespace api_energy.Service.Semesters
 {
     public interface ICSemesterService
     {

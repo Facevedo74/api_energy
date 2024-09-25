@@ -19,7 +19,7 @@ namespace api_energy.Context
        
 
 
-        // public DbSet<Semester> Semesters { get; set; }
+    
 
         public DbSet<Measurements> Measurements { get; set; }
         public DbSet<Files> Files { get; set; }
@@ -32,6 +32,11 @@ namespace api_energy.Context
             modelBuilder.Entity<Files>().HasKey(x => x.id);
             modelBuilder.Entity<CSemester>().HasKey(x => x.id);
             modelBuilder.Entity<Database>().HasKey(x => x.Id);
+           
+            modelBuilder.Entity<Database>()
+                .HasOne(x => x.Semester)
+                .WithMany(x => x.Databases)  
+                .HasForeignKey(x => x.Id_Semester); 
 
 
 
