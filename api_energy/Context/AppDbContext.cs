@@ -46,8 +46,10 @@ namespace api_energy.Context
             .HasForeignKey(m => m.id_period)
             .OnDelete(DeleteBehavior.Restrict);
 
-
             modelBuilder.Entity<Periods>().HasMany(x => x.files).WithOne(m => m.Periods);
+
+
+           
 
         }
     }

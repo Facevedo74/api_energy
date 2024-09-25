@@ -13,6 +13,7 @@ namespace api_energy.Service
         public (int TotalRows, List<Measurements> Results) getMeasurements(int id_period, int skip);
 
         Task AddPeriodFilesAsync(string name, List<IFormFile> files);
+        Task AditFilesPeriod(int id, List<IFormFile> files);
         void GenerateReport(string base64String);
 
     }
