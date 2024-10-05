@@ -36,8 +36,13 @@ namespace api_energy.Context
             modelBuilder.Entity<Database>()
                 .HasOne(x => x.Semester)
                 .WithMany(x => x.Databases)  
-                .HasForeignKey(x => x.Id_Semester); 
+                .HasForeignKey(x => x.Id_Semester);
 
+
+            
+            modelBuilder.Entity<Database>()
+                .HasIndex(d => d.NIS)
+                .IsUnique();
 
 
             modelBuilder.Entity<Files>()

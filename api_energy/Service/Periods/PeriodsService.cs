@@ -641,6 +641,33 @@ namespace api_energy.Service
 
 
         }
+
+        public async Task DeleteFileAndMeasurementsAsync(int fileId)
+        {
+            
+            var measurementsToDelete = await _context.Measurements
+                .Where(m => m.id_file == fileId)
+                .ToListAsync();
+
+            if (measurementsToDelete.Any())
+            {
+              
+                _context.Measurements.RemoveRange(measurementsToDelete);
+                await _context.SaveChangesAsync();
+            }
+
+            
+            var fileToDelete = await _context.Files.FindAsync(fileId);
+
+            if (fileToDelete == null)
+            {
+                throw new Exception("File not found.");
+            }
+
+            _context.Files.Remove(fileToDelete);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
 
