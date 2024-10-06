@@ -16,6 +16,9 @@ namespace api_energy.Service
         Task AditFilesPeriod(int id, List<IFormFile> files);
         void GenerateReport(string base64String);
 
+
+        Task DeleteFileAndMeasurementsAsync(int fileId);
+
     }
 }
 

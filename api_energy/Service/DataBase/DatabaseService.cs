@@ -122,10 +122,23 @@ namespace api_energy.Service.DataBase
                  
                     for (int row = 2; row <= rowCount; row++) 
                     {
+
+                        var nis = long.Parse(worksheet.Cells[row, 1].Text);
+
+                        var existingDatabase = await _context.Databases
+                            .FirstOrDefaultAsync(d => d.NIS == nis && d.Id_Semester == semesterId);
+
+                        if (existingDatabase != null)
+                        {
+                           
+                            continue;
+                        }
+
                         var database = new Database
                         {
                             Id_Semester = semesterId,
-                            NIS = long.Parse(worksheet.Cells[row, 1].Text),
+                            NIS = nis,
+                          
                             NombreArchivo = worksheet.Cells[row, 2].Text,
                             Medidor = worksheet.Cells[row, 3].Text,
                             Provincia = worksheet.Cells[row, 4].Text,
@@ -139,7 +152,12 @@ namespace api_energy.Service.DataBase
                 }
             }
 
-            await AddDatabaseRange(databases);
+           
+            if (databases.Any())
+            {
+                await AddDatabaseRange(databases);
+            }
+
             return "Carga masiva realizada con éxito.";
         }
 
