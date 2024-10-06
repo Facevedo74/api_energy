@@ -122,5 +122,21 @@ namespace api_energy.Controllers
             public int id { get; set; }
             public List<IFormFile> Files { get; set; }
         }
+
+
+        [HttpDelete("deleteFile/{fileId}")]
+        public async Task<IActionResult> DeleteFile(int fileId)
+        {
+            try
+            {
+                await periodsService.DeleteFileAndMeasurementsAsync(fileId);
+                return Ok(new { Message = "File and associated measurements deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
     }
 }
